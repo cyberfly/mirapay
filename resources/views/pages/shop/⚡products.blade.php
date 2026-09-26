@@ -52,30 +52,36 @@ new #[Layout('layouts::shop'), Title('Semua Produk')] class extends Component {
     }
 }; ?>
 
-<div class="space-y-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <h1 class="text-3xl font-bold text-sky-800 dark:text-sky-300">Semua produk</h1>
-        <div class="sm:w-72">
+<div class="space-y-8">
+    <div class="flex flex-col gap-6 border-b border-slate-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wider text-sky-600">Kedai</p>
+            <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">Semua produk</h1>
+        </div>
+        <div class="sm:w-80">
             <flux:input wire:model.live.debounce.300ms="search" placeholder="Cari produk" icon="magnifying-glass" />
         </div>
     </div>
 
     <div class="flex flex-wrap gap-2">
-        <button type="button" wire:click="$set('category', '')" class="rounded-full border px-4 py-1.5 text-sm font-medium transition {{ $category === '' ? 'border-sky-600 bg-sky-600 text-white' : 'border-sky-200 bg-white text-sky-700 hover:bg-sky-100' }}">Semua</button>
+        <button type="button" wire:click="$set('category', '')" class="rounded-full border px-4 py-2 text-sm font-medium transition {{ $category === '' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700' }}">Semua</button>
         @foreach ($this->categories as $item)
-            <button type="button" wire:key="cat-{{ $item->id }}" wire:click="selectCategory('{{ $item->slug }}')" class="rounded-full border px-4 py-1.5 text-sm font-medium transition {{ $category === $item->slug ? 'border-sky-600 bg-sky-600 text-white' : 'border-sky-200 bg-white text-sky-700 hover:bg-sky-100' }}">{{ $item->name }}</button>
+            <button type="button" wire:key="cat-{{ $item->id }}" wire:click="selectCategory('{{ $item->slug }}')" class="rounded-full border px-4 py-2 text-sm font-medium transition {{ $category === $item->slug ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700' }}">{{ $item->name }}</button>
         @endforeach
     </div>
 
     @if ($this->products->isEmpty())
-        <p class="rounded-2xl border border-dashed border-sky-200 bg-white p-8 text-center text-slate-500">Tiada produk dijumpai.</p>
+        <div class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
+            <flux:icon.magnifying-glass class="size-8 text-slate-300" />
+            <p class="text-slate-500">Tiada produk dijumpai.</p>
+        </div>
     @else
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($this->products as $product)
                 <x-shop.product-card :product="$product" wire:key="prod-{{ $product->id }}" />
             @endforeach
         </div>
 
-        <div>{{ $this->products->links() }}</div>
+        <div class="pt-4">{{ $this->products->links() }}</div>
     @endif
 </div>
