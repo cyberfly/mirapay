@@ -94,6 +94,7 @@ new #[Title('Butiran pesanan')] class extends Component {
             <p>Pos: {{ Money::format($order->shipping_fee) }}</p>
         @endif
         <p class="font-semibold">Jumlah: {{ Money::format($order->total) }}</p>
+        <p class="text-sm">Gateway: {{ $order->payment_gateway }}@if ($order->stripe_session_id) ({{ $order->stripe_session_id }})@endif @if ($order->payment_reference) · Ref: {{ $order->payment_reference }}@endif</p>
     </div>
 
     <div class="space-y-1 rounded-xl border border-zinc-200 p-5 text-sm dark:border-zinc-700">

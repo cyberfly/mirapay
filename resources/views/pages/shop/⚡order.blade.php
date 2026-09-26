@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Payments\PaymentGateway;
 use App\Support\Money;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -15,9 +17,20 @@ new #[Layout('layouts::shop', ['noindex' => true]), Title('Pesanan')] class exte
     {
         $this->order = $order;
     }
+
+    public function pay(): void
+    {
+        $this->order->refresh();
+
+        if ($this->order->status !== OrderStatus::Pending || $this->order->payment_gateway !== 'stripe') {
+            return;
+        }
+
+        $this->redirect(app(PaymentGateway::class)->checkoutUrl($this->order));
+    }
 }; ?>
 
-<div class="mx-auto max-w-2xl space-y-6">
+<div class="mx-auto max-w-2xl space-y-6" @if ($order->status === OrderStatus::Pending && $order->payment_gateway === 'stripe') wire:poll.3s @endif>
     <div class="flex flex-col gap-4 rounded-3xl bg-linear-to-br from-sky-50 via-white to-indigo-50 p-6 ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
             <p class="text-sm font-medium text-slate-500">Nombor pesanan</p>
@@ -26,7 +39,13 @@ new #[Layout('layouts::shop', ['noindex' => true]), Title('Pesanan')] class exte
         <flux:badge size="lg" :color="$order->status->color()">{{ $order->status->label() }}</flux:badge>
     </div>
 
-    @if ($order->status === \App\Enums\OrderStatus::Pending)
+    @if ($order->status === OrderStatus::Pending && $order->payment_gateway === 'stripe')
+        <flux:callout variant="warning" icon="clock" heading="Menunggu pengesahan bayaran" text="Jika anda telah membayar, halaman ini akan dikemas kini secara automatik. Jika belum, sila teruskan pembayaran.">
+            <x-slot name="actions">
+                <flux:button wire:click="pay" variant="primary" size="sm">Bayar sekarang</flux:button>
+            </x-slot>
+        </flux:callout>
+    @elseif ($order->status === OrderStatus::Pending)
         <flux:callout variant="warning" icon="clock" heading="Pembayaran belum diterima" text="Pesanan anda telah direkodkan. Kami akan mengesahkan bayaran secara manual." />
     @endif
 

@@ -38,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $state
  * @property string $payment_gateway
  * @property string|null $payment_reference
+ * @property string|null $stripe_session_id
  * @property Carbon|null $paid_at
  * @property Carbon|null $shipped_at
  * @property Carbon|null $cancelled_at
@@ -46,7 +47,7 @@ use Illuminate\Support\Carbon;
     'order_number', 'product_id', 'coupon_id', 'status', 'product_name', 'unit_price', 'quantity',
     'subtotal', 'discount', 'shipping_fee', 'total', 'coupon_code', 'requires_shipping',
     'customer_name', 'email', 'phone', 'address_line1', 'address_line2', 'postcode', 'city', 'state',
-    'payment_gateway', 'payment_reference', 'paid_at', 'shipped_at', 'cancelled_at',
+    'payment_gateway', 'payment_reference', 'stripe_session_id', 'paid_at', 'shipped_at', 'cancelled_at',
 ])]
 class Order extends Model
 {

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\User;
 use App\Payments\ManualPaymentGateway;
 use App\Payments\PaymentGateway;
+use App\Payments\StripePaymentGateway;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(PaymentGateway::class, ManualPaymentGateway::class);
+        $this->app->bind(PaymentGateway::class, fn (): PaymentGateway => config('services.payment_gateway') === 'stripe'
+            ? new StripePaymentGateway
+            : new ManualPaymentGateway);
     }
 
     /**
