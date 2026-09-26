@@ -66,3 +66,9 @@ it('filters and searches orders', function () {
         ->set('status', 'paid')->assertSee('Kamal')->assertDontSee('Zainab')
         ->set('status', '')->set('search', 'Zainab')->assertSee('Zainab')->assertDontSee('Kamal');
 });
+
+it('links each order in the list to its detail page', function () {
+    $order = Order::factory()->create();
+
+    Livewire::test('pages::admin.orders.index')->assertSee('Lihat')->assertSee(route('admin.orders.show', $order), false);
+});

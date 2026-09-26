@@ -8,7 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-new #[Title('Sunting produk')] class extends Component {
+new #[Title('Edit produk')] class extends Component {
     use WithFileUploads;
 
     #[Locked]
@@ -37,7 +37,7 @@ new #[Title('Sunting produk')] class extends Component {
 }; ?>
 
 <section class="w-full max-w-2xl space-y-6">
-    <flux:heading size="xl" level="1">Sunting produk</flux:heading>
+    <flux:heading size="xl" level="1">Edit produk</flux:heading>
 
     <form wire:submit="save" class="space-y-6">
         <x-admin.product-fields :form="$form" :current-image="$product->imageUrl()" />

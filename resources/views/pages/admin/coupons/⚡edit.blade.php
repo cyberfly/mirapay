@@ -9,7 +9,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('Sunting kupon')] class extends Component {
+new #[Title('Edit kupon')] class extends Component {
     #[Locked]
     public Coupon $coupon;
 
@@ -40,7 +40,7 @@ new #[Title('Sunting kupon')] class extends Component {
 }; ?>
 
 <section class="w-full max-w-2xl space-y-6">
-    <flux:heading size="xl" level="1">Sunting kupon</flux:heading>
+    <flux:heading size="xl" level="1">Edit kupon</flux:heading>
 
     <form wire:submit="save" class="space-y-6">
         <x-admin.coupon-fields :form="$form" :products="$this->products" />

@@ -78,3 +78,12 @@ it('sanitizes the description html on save', function () {
 
     expect(Product::first()->description)->toBe('<p>Halo</p>');
 });
+
+it('searches the product list by name or slug', function () {
+    Product::factory()->create(['name' => 'Ebook Raya', 'slug' => 'ebook-raya']);
+    Product::factory()->create(['name' => 'Buku Resepi', 'slug' => 'buku-resepi']);
+
+    Livewire::test('pages::admin.products.index')
+        ->set('search', 'Raya')->assertSee('Ebook Raya')->assertDontSee('Buku Resepi')
+        ->set('search', 'buku-res')->assertSee('Buku Resepi')->assertDontSee('Ebook Raya');
+});

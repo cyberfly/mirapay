@@ -71,6 +71,7 @@ new #[Title('Pesanan')] class extends Component {
             <flux:table.column>Produk</flux:table.column>
             <flux:table.column>Jumlah</flux:table.column>
             <flux:table.column>Status</flux:table.column>
+            <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
             @foreach ($this->orders as $order)
@@ -80,6 +81,7 @@ new #[Title('Pesanan')] class extends Component {
                     <flux:table.cell>{{ $order->product_name }} &times; {{ $order->quantity }}</flux:table.cell>
                     <flux:table.cell>{{ Money::format($order->total) }}</flux:table.cell>
                     <flux:table.cell><flux:badge :color="$order->status->color()">{{ $order->status->label() }}</flux:badge></flux:table.cell>
+                    <flux:table.cell class="text-end"><flux:button size="sm" :href="route('admin.orders.show', $order)" wire:navigate>Lihat</flux:button></flux:table.cell>
                 </flux:table.row>
             @endforeach
         </flux:table.rows>

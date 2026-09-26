@@ -53,3 +53,11 @@ it('updates a coupon keeping its own code valid', function () {
 
     expect($coupon->fresh()->value)->toBe(20);
 });
+
+it('searches the coupon list by code', function () {
+    Coupon::factory()->create(['code' => 'RAYA10']);
+    Coupon::factory()->create(['code' => 'JIMAT5']);
+
+    Livewire::test('pages::admin.coupons.index')
+        ->set('search', 'raya')->assertSee('RAYA10')->assertDontSee('JIMAT5');
+});
