@@ -17,6 +17,8 @@ it('redirects to the url returned by the gateway', function () {
         {
             return 'https://pay.test/'.$order->order_number;
         }
+
+        public function expire(Order $order): void {}
     });
 
     $product = Product::factory()->digital()->create();

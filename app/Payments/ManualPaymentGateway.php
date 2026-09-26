@@ -10,4 +10,9 @@ class ManualPaymentGateway implements PaymentGateway
     {
         return route('shop.orders.show', $order);
     }
+
+    public function expire(Order $order): void
+    {
+        //
+    }
 }

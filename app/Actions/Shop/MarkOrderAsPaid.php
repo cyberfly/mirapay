@@ -7,12 +7,20 @@ use App\Mail\NewOrderAdminMail;
 use App\Mail\OrderPaidMail;
 use App\Models\Order;
 use App\Models\User;
+use App\Payments\PaymentGateway;
 use DomainException;
 use Illuminate\Support\Facades\Mail;
 
 class MarkOrderAsPaid
 {
-    public function __invoke(Order $order, ?string $reference = null): Order
+    public function __construct(protected PaymentGateway $gateway) {}
+
+    /**
+     * @param  bool  $expireGatewaySession  Close the open payment session too, so the customer cannot pay a second time
+     *                                      after an admin marked the order paid by hand. Pass false when the gateway has
+     *                                      just reported the payment on the session that is still current.
+     */
+    public function __invoke(Order $order, ?string $reference = null, bool $expireGatewaySession = true): Order
     {
         $updated = Order::whereKey($order->id)
             ->where('status', OrderStatus::Pending)
@@ -24,6 +32,10 @@ class MarkOrderAsPaid
 
         if ($updated === 0) {
             throw new DomainException('Hanya pesanan yang belum dibayar boleh ditanda sebagai dibayar.');
+        }
+
+        if ($expireGatewaySession) {
+            $this->gateway->expire($order);
         }
 
         $order->refresh();

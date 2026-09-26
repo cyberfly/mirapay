@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Stripe\StripeClient;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,8 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(PaymentGateway::class, fn (): PaymentGateway => config('services.payment_gateway') === 'stripe'
-            ? new StripePaymentGateway
+        $this->app->bind(StripeClient::class, fn (): StripeClient => new StripeClient((string) config('services.stripe.secret')));
+
+        $this->app->bind(PaymentGateway::class, fn ($app): PaymentGateway => config('services.payment_gateway') === 'stripe'
+            ? $app->make(StripePaymentGateway::class)
             : new ManualPaymentGateway);
     }
 
