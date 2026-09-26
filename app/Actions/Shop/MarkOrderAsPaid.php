@@ -3,8 +3,12 @@
 namespace App\Actions\Shop;
 
 use App\Enums\OrderStatus;
+use App\Mail\NewOrderAdminMail;
+use App\Mail\OrderPaidMail;
 use App\Models\Order;
+use App\Models\User;
 use DomainException;
+use Illuminate\Support\Facades\Mail;
 
 class MarkOrderAsPaid
 {
@@ -22,6 +26,21 @@ class MarkOrderAsPaid
             throw new DomainException('Hanya pesanan yang belum dibayar boleh ditanda sebagai dibayar.');
         }
 
-        return $order->refresh();
+        $order->refresh();
+
+        $this->notify($order);
+
+        return $order;
+    }
+
+    protected function notify(Order $order): void
+    {
+        Mail::to($order->email)->queue(new OrderPaidMail($order));
+
+        $admins = User::where('is_admin', true)->pluck('email');
+
+        if ($admins->isNotEmpty()) {
+            Mail::to($admins->all())->queue(new NewOrderAdminMail($order));
+        }
     }
 }
