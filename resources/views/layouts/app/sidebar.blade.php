@@ -18,6 +18,17 @@
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
+            @can('admin')
+                <flux:sidebar.nav>
+                    <flux:sidebar.group heading="Kedai" class="grid">
+                        <flux:sidebar.item icon="shopping-bag" :href="route('admin.products.index')" :current="request()->routeIs('admin.products.*')" wire:navigate>Produk</flux:sidebar.item>
+                        <flux:sidebar.item icon="tag" :href="route('admin.categories.index')" :current="request()->routeIs('admin.categories.*')" wire:navigate>Kategori</flux:sidebar.item>
+                        <flux:sidebar.item icon="ticket" :href="route('admin.coupons.index')" :current="request()->routeIs('admin.coupons.*')" wire:navigate>Kupon</flux:sidebar.item>
+                        <flux:sidebar.item icon="inbox-stack" :href="route('admin.orders.index')" :current="request()->routeIs('admin.orders.*')" wire:navigate>Pesanan</flux:sidebar.item>
+                    </flux:sidebar.group>
+                </flux:sidebar.nav>
+            @endcan
+
             <flux:spacer />
 
             <flux:sidebar.nav>
