@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Payments\ChipPaymentGateway;
 use App\Payments\ManualPaymentGateway;
 use App\Payments\PaymentGateway;
 use App\Payments\StripePaymentGateway;
@@ -23,9 +24,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(StripeClient::class, fn (): StripeClient => new StripeClient((string) config('services.stripe.secret')));
 
-        $this->app->bind(PaymentGateway::class, fn ($app): PaymentGateway => config('services.payment_gateway') === 'stripe'
-            ? $app->make(StripePaymentGateway::class)
-            : new ManualPaymentGateway);
+        $this->app->bind(PaymentGateway::class, fn ($app): PaymentGateway => match (config('services.payment_gateway')) {
+            'stripe' => $app->make(StripePaymentGateway::class),
+            'chip' => $app->make(ChipPaymentGateway::class),
+            default => new ManualPaymentGateway,
+        });
     }
 
     /**

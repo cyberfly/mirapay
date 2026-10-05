@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Shop\CancelOrder;
+use App\Actions\Shop\FlagUnattributedPayment;
 use App\Actions\Shop\MarkOrderAsPaid;
 use App\Enums\OrderStatus;
-use App\Mail\PaymentNeedsAttentionMail;
 use App\Models\Order;
-use App\Models\User;
 use DomainException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\StripeObject;
 use Stripe\Webhook;
@@ -20,7 +18,7 @@ use UnexpectedValueException;
 
 class StripeWebhookController extends Controller
 {
-    public function __invoke(Request $request, MarkOrderAsPaid $markAsPaid, CancelOrder $cancel): Response
+    public function __invoke(Request $request, MarkOrderAsPaid $markAsPaid, CancelOrder $cancel, FlagUnattributedPayment $flag): Response
     {
         try {
             $event = Webhook::constructEvent(
@@ -36,9 +34,9 @@ class StripeWebhookController extends Controller
 
         match ($event->type) {
             'checkout.session.completed' => ($session->payment_status ?? null) === 'paid'
-                ? $this->paymentReceived($session, $markAsPaid)
+                ? $this->paymentReceived($session, $markAsPaid, $flag)
                 : null,
-            'checkout.session.async_payment_succeeded' => $this->paymentReceived($session, $markAsPaid),
+            'checkout.session.async_payment_succeeded' => $this->paymentReceived($session, $markAsPaid, $flag),
             'checkout.session.expired' => $this->sessionExpired($session, $cancel),
             default => null,
         };
@@ -49,7 +47,7 @@ class StripeWebhookController extends Controller
     /**
      * Money has been captured. It must always end up attributed to an order, or be flagged.
      */
-    protected function paymentReceived(StripeObject $session, MarkOrderAsPaid $markAsPaid): void
+    protected function paymentReceived(StripeObject $session, MarkOrderAsPaid $markAsPaid, FlagUnattributedPayment $flag): void
     {
         $reference = $session->payment_intent ?? null;
         $order = $this->orderForPayment($session);
@@ -80,7 +78,7 @@ class StripeWebhookController extends Controller
             return;
         }
 
-        $this->flagUnattributedPayment($order, $session, $reference);
+        $flag('Stripe', $order, $reference, ['session' => $session->id, 'payment_intent' => $reference]);
     }
 
     protected function sessionExpired(StripeObject $session, CancelOrder $cancel): void
@@ -102,21 +100,5 @@ class StripeWebhookController extends Controller
         }
 
         return $order;
-    }
-
-    protected function flagUnattributedPayment(Order $order, StripeObject $session, ?string $reference): void
-    {
-        Log::critical('Stripe: bayaran diterima untuk pesanan yang tidak lagi menunggu bayaran.', [
-            'order' => $order->order_number,
-            'status' => $order->status->value,
-            'session' => $session->id,
-            'payment_intent' => $reference,
-        ]);
-
-        $admins = User::where('is_admin', true)->pluck('email');
-
-        if ($admins->isNotEmpty()) {
-            Mail::to($admins->all())->queue(new PaymentNeedsAttentionMail($order, $reference));
-        }
     }
 }
