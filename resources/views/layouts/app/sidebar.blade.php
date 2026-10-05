@@ -26,6 +26,13 @@
                         <flux:sidebar.item icon="ticket" :href="route('admin.coupons.index')" :current="request()->routeIs('admin.coupons.*')" wire:navigate>Kupon</flux:sidebar.item>
                         <flux:sidebar.item icon="inbox-stack" :href="route('admin.orders.index')" :current="request()->routeIs('admin.orders.*')" wire:navigate>Pesanan</flux:sidebar.item>
                     </flux:sidebar.group>
+                    <flux:sidebar.group heading="Laporan" class="grid">
+                        <flux:sidebar.item icon="chart-bar" :href="route('admin.reports.sales')" :current="request()->routeIs('admin.reports.sales')" wire:navigate>Jualan</flux:sidebar.item>
+                        <flux:sidebar.item icon="cube" :href="route('admin.reports.products')" :current="request()->routeIs('admin.reports.products')" wire:navigate>Produk &amp; kategori</flux:sidebar.item>
+                        <flux:sidebar.item icon="ticket" :href="route('admin.reports.coupons')" :current="request()->routeIs('admin.reports.coupons')" wire:navigate>Kupon</flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('admin.reports.customers')" :current="request()->routeIs('admin.reports.customers')" wire:navigate>Pelanggan</flux:sidebar.item>
+                        <flux:sidebar.item icon="queue-list" :href="route('admin.reports.statuses')" :current="request()->routeIs('admin.reports.statuses')" wire:navigate>Status pesanan</flux:sidebar.item>
+                    </flux:sidebar.group>
                 </flux:sidebar.nav>
             @endcan
 

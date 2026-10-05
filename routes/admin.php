@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ReportExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'can:admin'])
@@ -18,4 +19,13 @@ Route::middleware(['auth', 'verified', 'can:admin'])
 
         Route::livewire('orders', 'pages::admin.orders.index')->name('orders.index');
         Route::livewire('orders/{order:public_id}', 'pages::admin.orders.show')->name('orders.show');
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::livewire('sales', 'pages::admin.reports.sales')->name('sales');
+            Route::livewire('products', 'pages::admin.reports.products')->name('products');
+            Route::livewire('coupons', 'pages::admin.reports.coupons')->name('coupons');
+            Route::livewire('customers', 'pages::admin.reports.customers')->name('customers');
+            Route::livewire('statuses', 'pages::admin.reports.statuses')->name('statuses');
+            Route::get('{report}/export', ReportExportController::class)->whereIn('report', ['sales', 'products', 'coupons', 'customers', 'statuses'])->name('export');
+        });
     });
