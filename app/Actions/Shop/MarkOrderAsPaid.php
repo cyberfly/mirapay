@@ -2,9 +2,11 @@
 
 namespace App\Actions\Shop;
 
+use App\Actions\Subscriptions\RecordSubscriptionPayment;
 use App\Enums\OrderStatus;
 use App\Mail\NewOrderAdminMail;
 use App\Mail\OrderPaidMail;
+use App\Mail\SubscriptionRenewedMail;
 use App\Models\Order;
 use App\Models\User;
 use App\Payments\PaymentGateway;
@@ -40,6 +42,8 @@ class MarkOrderAsPaid
 
         $order->refresh();
 
+        app(RecordSubscriptionPayment::class)($order);
+
         $this->notify($order);
 
         return $order;
@@ -47,7 +51,7 @@ class MarkOrderAsPaid
 
     protected function notify(Order $order): void
     {
-        Mail::to($order->email)->queue(new OrderPaidMail($order));
+        Mail::to($order->email)->queue($order->is_renewal ? new SubscriptionRenewedMail($order) : new OrderPaidMail($order));
 
         $admins = User::where('is_admin', true)->pluck('email');
 

@@ -3,9 +3,11 @@
 namespace App\Actions\Shop;
 
 use App\Enums\OrderStatus;
+use App\Enums\SubscriptionStatus;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Subscription;
 use App\Payments\PaymentGateway;
 use Illuminate\Support\Facades\DB;
 
@@ -30,14 +32,24 @@ class CancelOrder
                 return false;
             }
 
-            Product::whereKey($order->product_id)
-                ->whereNotNull('stock')
-                ->increment('stock', $order->quantity);
+            // A renewal never took stock or a coupon use, so there is nothing to give back.
+            if (! $order->is_renewal) {
+                Product::whereKey($order->product_id)
+                    ->whereNotNull('stock')
+                    ->increment('stock', $order->quantity);
 
-            if ($order->coupon_id !== null) {
-                Coupon::whereKey($order->coupon_id)
-                    ->where('used_count', '>', 0)
-                    ->decrement('used_count');
+                if ($order->coupon_id !== null) {
+                    Coupon::whereKey($order->coupon_id)
+                        ->where('used_count', '>', 0)
+                        ->decrement('used_count');
+                }
+
+                // The first order was never paid, so the subscription never started.
+                if ($order->subscription_id !== null) {
+                    Subscription::whereKey($order->subscription_id)
+                        ->where('status', SubscriptionStatus::Pending)
+                        ->update(['status' => SubscriptionStatus::Cancelled, 'cancelled_at' => now(), 'ends_at' => now()]);
+                }
             }
 
             return true;

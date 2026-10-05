@@ -23,6 +23,9 @@
         <h3 class="font-semibold text-slate-900 transition group-hover:text-sky-600">{{ $product->name }}</h3>
         <div class="mt-auto flex items-baseline gap-2 pt-1">
             <span class="font-semibold text-slate-900">{{ \App\Support\Money::format($product->price) }}</span>
+            @if ($product->billing_interval)
+                <span class="text-sm text-slate-500">/ {{ $product->billing_interval->unit() }}</span>
+            @endif
             @if ($product->discountPercent())
                 <span class="text-sm text-slate-400 line-through">{{ \App\Support\Money::format($product->compare_at_price) }}</span>
             @endif

@@ -18,4 +18,7 @@ Route::middleware(['auth', 'verified', 'can:admin'])
 
         Route::livewire('orders', 'pages::admin.orders.index')->name('orders.index');
         Route::livewire('orders/{order:public_id}', 'pages::admin.orders.show')->name('orders.show');
+
+        Route::livewire('subscriptions', 'pages::admin.subscriptions.index')->name('subscriptions.index');
+        Route::livewire('subscriptions/{subscription:public_id}', 'pages::admin.subscriptions.show')->name('subscriptions.show');
     });

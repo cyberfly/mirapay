@@ -3,6 +3,7 @@
 use App\Actions\Shop\CalculatePrice;
 use App\Actions\Shop\PlaceOrder;
 use App\Actions\Shop\ResolveCoupon;
+use App\Actions\Subscriptions\StartSubscription;
 use App\Enums\MalaysianState;
 use App\Models\Product;
 use App\Payments\PaymentGateway;
@@ -174,7 +175,7 @@ new #[Layout('layouts::shop')] class extends Component {
         $validated = $this->validate();
 
         try {
-            $order = app(PlaceOrder::class)(
+            $order = app($this->product->isSubscription() ? StartSubscription::class : PlaceOrder::class)(
                 $this->product,
                 (int) $validated['quantity'],
                 $this->appliedCouponCode,
@@ -236,7 +237,7 @@ new #[Layout('layouts::shop')] class extends Component {
                 @else
                     <form wire:submit="placeOrder" class="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5">
                         <div>
-                            <h2 class="text-lg font-semibold text-slate-900">Buat pesanan</h2>
+                            <h2 class="text-lg font-semibold text-slate-900">{{ $product->isSubscription() ? 'Langgan sekarang' : 'Buat pesanan' }}</h2>
                             <p class="text-sm text-slate-500">Isi butiran anda untuk teruskan ke pembayaran.</p>
                         </div>
 
@@ -294,10 +295,15 @@ new #[Layout('layouts::shop')] class extends Component {
                             @endif
                             <div class="flex justify-between border-t border-slate-200 pt-2 text-base font-semibold text-slate-900"><dt>Jumlah</dt><dd>{{ Money::format($this->breakdown->total) }}</dd></div>
                         </dl>
+                        @if ($product->isSubscription())
+                            <p class="text-xs text-slate-500">
+                                Diperbaharui setiap {{ $product->billing_interval->unit() }} pada harga {{ Money::format($product->price * max(1, (int) $quantity) + ($product->requires_shipping ? $product->shipping_fee : 0)) }}. Kupon hanya untuk bayaran pertama. Boleh dibatalkan pada bila-bila masa.
+                            </p>
+                        @endif
 
                         <button type="submit" wire:loading.attr="disabled" wire:target="placeOrder" class="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 px-6 py-3.5 font-semibold text-white shadow-sm shadow-sky-600/20 transition hover:bg-sky-700 disabled:opacity-60">
                             <flux:icon.loading variant="micro" wire:loading wire:target="placeOrder" />
-                            Beli sekarang
+                            {{ $product->isSubscription() ? 'Langgan sekarang' : 'Beli sekarang' }}
                         </button>
                         <p class="flex items-center justify-center gap-1.5 text-xs text-slate-400">
                             <flux:icon.lock-closed variant="micro" />

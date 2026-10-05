@@ -9,6 +9,9 @@
 @endif
 <div class="flex flex-wrap items-baseline gap-3 pt-1">
     <span class="text-3xl font-bold text-slate-900">{{ \App\Support\Money::format($product->price) }}</span>
+    @if ($product->billing_interval)
+        <span class="text-lg text-slate-500">/ {{ $product->billing_interval->unit() }}</span>
+    @endif
     @if ($product->compare_at_price && $product->compare_at_price > $product->price)
         <span class="text-lg text-slate-400 line-through">{{ \App\Support\Money::format($product->compare_at_price) }}</span>
         @if ($product->discountPercent())

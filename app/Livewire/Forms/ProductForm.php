@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Enums\BillingInterval;
 use App\Models\Product;
 use App\Support\HtmlSanitizer;
 use App\Support\Money;
@@ -35,6 +36,8 @@ class ProductForm extends Form
 
     public string $shipping_fee = '0.00';
 
+    public string $billing_interval = '';
+
     public string $stock = '';
 
     public bool $is_active = true;
@@ -54,6 +57,7 @@ class ProductForm extends Form
         $this->compare_at_price = $product->compare_at_price ? Money::toInput($product->compare_at_price) : '';
         $this->requires_shipping = $product->requires_shipping;
         $this->shipping_fee = Money::toInput($product->shipping_fee);
+        $this->billing_interval = $product->billing_interval->value ?? '';
         $this->stock = $product->stock === null ? '' : (string) $product->stock;
         $this->is_active = $product->is_active;
     }
@@ -76,6 +80,7 @@ class ProductForm extends Form
             'compare_at_price' => ['nullable', ...$money],
             'requires_shipping' => ['boolean'],
             'shipping_fee' => ['required', ...$money],
+            'billing_interval' => ['nullable', Rule::enum(BillingInterval::class)],
             'stock' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'image' => ['nullable', 'image', 'max:2048'],
@@ -92,6 +97,7 @@ class ProductForm extends Form
             'price' => 'harga',
             'compare_at_price' => 'harga asal',
             'shipping_fee' => 'caj pos',
+            'billing_interval' => 'kitaran bayaran',
             'stock' => 'stok',
             'image' => 'gambar',
         ];
@@ -146,6 +152,7 @@ class ProductForm extends Form
             'compare_at_price' => $compareAt,
             'requires_shipping' => $this->requires_shipping,
             'shipping_fee' => $shippingFee,
+            'billing_interval' => $this->billing_interval === '' ? null : $this->billing_interval,
             'stock' => $this->stock === '' ? null : (int) $this->stock,
             'is_active' => $this->is_active,
             'image_path' => $this->image?->store('products', 'public') ?? $currentImage,

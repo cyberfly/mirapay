@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\BillingInterval;
 use App\Support\HtmlSanitizer;
+use App\Support\Money;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,10 +27,11 @@ use Illuminate\Support\Facades\Storage;
  * @property int|null $compare_at_price
  * @property bool $requires_shipping
  * @property int $shipping_fee
+ * @property BillingInterval|null $billing_interval
  * @property int|null $stock
  * @property bool $is_active
  */
-#[Fillable(['category_id', 'is_featured', 'name', 'slug', 'tagline', 'description', 'image_path', 'price', 'compare_at_price', 'requires_shipping', 'shipping_fee', 'stock', 'is_active'])]
+#[Fillable(['category_id', 'is_featured', 'name', 'slug', 'tagline', 'description', 'image_path', 'price', 'compare_at_price', 'requires_shipping', 'shipping_fee', 'billing_interval', 'stock', 'is_active'])]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -41,6 +44,7 @@ class Product extends Model
     {
         return [
             'requires_shipping' => 'boolean',
+            'billing_interval' => BillingInterval::class,
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
         ];
@@ -93,6 +97,21 @@ class Product extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function isSubscription(): bool
+    {
+        return $this->billing_interval !== null;
+    }
+
+    /**
+     * Price with its billing cycle, e.g. "RM29.00 / bulan"; a plain price for one-off products.
+     */
+    public function priceLabel(): string
+    {
+        $price = Money::format($this->price);
+
+        return $this->billing_interval ? "{$price} / {$this->billing_interval->unit()}" : $price;
     }
 
     public function isSoldOut(): bool
