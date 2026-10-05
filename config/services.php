@@ -36,6 +36,14 @@ return [
         'currency' => env('STRIPE_CURRENCY', 'myr'),
     ],
 
+    'chip' => [
+        'brand_id' => env('CHIP_BRAND_ID'),
+        'api_key' => env('CHIP_API_KEY'),
+        'public_key' => str_replace('\n', "\n", (string) env('CHIP_PUBLIC_KEY')),
+        'currency' => env('CHIP_CURRENCY', 'MYR'),
+        'base_url' => env('CHIP_BASE_URL', 'https://gate.chip-in.asia/api/v1/'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
