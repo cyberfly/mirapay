@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BillingInterval;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -43,6 +44,11 @@ class ProductFactory extends Factory
     public function digital(): static
     {
         return $this->state(fn () => ['requires_shipping' => false, 'shipping_fee' => 0]);
+    }
+
+    public function subscription(BillingInterval $interval = BillingInterval::Month): static
+    {
+        return $this->state(fn () => ['billing_interval' => $interval]);
     }
 
     public function featured(): static

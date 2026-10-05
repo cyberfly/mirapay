@@ -22,15 +22,25 @@ new #[Layout('layouts::shop', ['noindex' => true]), Title('Pesanan')] class exte
     {
         $this->order->refresh();
 
-        if ($this->order->status !== OrderStatus::Pending || $this->order->payment_gateway !== 'stripe') {
+        if (! $this->awaitsOnlinePayment()) {
             return;
         }
 
         $this->redirect(app(PaymentGateway::class)->checkoutUrl($this->order));
     }
+
+    /**
+     * A renewal has no gateway session yet when its payment link is emailed, so it counts as soon as Stripe is the gateway in use.
+     */
+    public function awaitsOnlinePayment(): bool
+    {
+        return $this->order->status === OrderStatus::Pending
+            && ($this->order->payment_gateway === 'stripe'
+                || ($this->order->is_renewal && config('services.payment_gateway') === 'stripe'));
+    }
 }; ?>
 
-<div class="mx-auto max-w-2xl space-y-6" @if ($order->status === OrderStatus::Pending && $order->payment_gateway === 'stripe') wire:poll.3s @endif>
+<div class="mx-auto max-w-2xl space-y-6" @if ($this->awaitsOnlinePayment()) wire:poll.3s @endif>
     <div class="flex flex-col gap-4 rounded-3xl bg-linear-to-br from-sky-50 via-white to-indigo-50 p-6 ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
             <p class="text-sm font-medium text-slate-500">Nombor pesanan</p>
@@ -39,7 +49,7 @@ new #[Layout('layouts::shop', ['noindex' => true]), Title('Pesanan')] class exte
         <flux:badge size="lg" :color="$order->status->color()">{{ $order->status->label() }}</flux:badge>
     </div>
 
-    @if ($order->status === OrderStatus::Pending && $order->payment_gateway === 'stripe')
+    @if ($this->awaitsOnlinePayment())
         <flux:callout variant="warning" icon="clock" heading="Menunggu pengesahan bayaran" text="Jika anda telah membayar, halaman ini akan dikemas kini secara automatik. Jika belum, sila teruskan pembayaran.">
             <x-slot name="actions">
                 <flux:button wire:click="pay" variant="primary" size="sm">Bayar sekarang</flux:button>

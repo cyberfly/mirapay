@@ -88,7 +88,8 @@ class StripeWebhookController extends Controller
         // Only the order's current session may cancel it; an older, superseded one must not.
         $order = Order::where('stripe_session_id', $session->id)->first();
 
-        if ($order?->status === OrderStatus::Pending) {
+        // A renewal stays payable until the grace period ends: its next payment attempt opens a fresh session.
+        if ($order?->status === OrderStatus::Pending && ! $order->is_renewal) {
             $cancel($order, expireGatewaySession: false);
         }
     }

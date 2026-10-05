@@ -17,6 +17,13 @@
         <flux:input wire:model="form.compare_at_price" label="Harga asal dicoret (RM, pilihan)" inputmode="decimal" />
     </div>
 
+    <flux:select wire:model="form.billing_interval" label="Kitaran bayaran">
+        <flux:select.option value="">Sekali bayar (bukan langganan)</flux:select.option>
+        @foreach (\App\Enums\BillingInterval::cases() as $interval)
+            <flux:select.option value="{{ $interval->value }}">Langganan {{ strtolower($interval->label()) }}</flux:select.option>
+        @endforeach
+    </flux:select>
+
     <flux:input wire:model="form.stock" type="number" min="0" label="Stok (kosong = tanpa had)" />
 
     <flux:switch wire:model.live="form.requires_shipping" label="Produk fizikal (perlu penghantaran)" />

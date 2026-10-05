@@ -7,7 +7,6 @@ use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class PlaceOrder
@@ -57,7 +56,7 @@ class PlaceOrder
                 : [];
 
             return Order::create([
-                'order_number' => $this->generateOrderNumber(),
+                'order_number' => Order::generateNumber(),
                 'product_id' => $product->id,
                 'coupon_id' => $coupon?->id,
                 'status' => OrderStatus::Pending,
@@ -80,14 +79,5 @@ class PlaceOrder
                 'state' => $address['state'] ?? null,
             ]);
         });
-    }
-
-    protected function generateOrderNumber(): string
-    {
-        do {
-            $number = 'MP'.now()->format('ymd').'-'.Str::upper(Str::random(5));
-        } while (Order::where('order_number', $number)->exists());
-
-        return $number;
     }
 }
