@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\MalaysianState;
 use App\Enums\OrderStatus;
+use Carbon\CarbonInterface;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -90,6 +92,24 @@ class Order extends Model
     public function coupon(): BelongsTo
     {
         return $this->belongsTo(Coupon::class);
+    }
+
+    /**
+     * Orders that count as sales: paid or shipped.
+     *
+     * @param  Builder<Order>  $query
+     */
+    public function scopeSales(Builder $query): void
+    {
+        $query->whereIn('status', [OrderStatus::Paid, OrderStatus::Shipped]);
+    }
+
+    /**
+     * @param  Builder<Order>  $query
+     */
+    public function scopePaidBetween(Builder $query, CarbonInterface $from, CarbonInterface $to): void
+    {
+        $query->whereBetween('paid_at', [$from, $to]);
     }
 
     public function stateLabel(): ?string

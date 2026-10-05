@@ -3,6 +3,7 @@
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Support\Money;
+use App\Support\Reports\Reports;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -30,9 +31,7 @@ new #[Layout('layouts::app'), Title('Dashboard')] class extends Component {
 
     protected function sales()
     {
-        return Order::query()
-            ->whereIn('status', [OrderStatus::Paid, OrderStatus::Shipped])
-            ->where('paid_at', '>=', $this->rangeStart());
+        return Order::query()->sales()->where('paid_at', '>=', $this->rangeStart());
     }
 
     /**
@@ -41,13 +40,7 @@ new #[Layout('layouts::app'), Title('Dashboard')] class extends Component {
     #[Computed]
     public function summary(): array
     {
-        $revenue = (int) $this->sales()->sum('total');
-        $orders = $this->sales()->count();
-
-        return [
-            'revenue' => $revenue,
-            'orders' => $orders,
-            'average' => $orders > 0 ? intdiv($revenue, $orders) : 0,
+        return Reports::make($this->rangeStart()->toDateString())->salesSummary() + [
             'pending' => Order::where('status', OrderStatus::Pending)->count(),
         ];
     }
