@@ -3,7 +3,9 @@ name: mirapay
 x-app: &app
   image: mirapay-app:latest
   restart: unless-stopped
-  env_file: .env.production
+  env_file:
+    - path: .env.production
+      required: false
   environment:
     DB_CONNECTION: mysql
     DB_HOST: mysql
