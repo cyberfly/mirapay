@@ -14,7 +14,7 @@ class PaymentNeedsAttentionMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Order $order, public ?string $paymentReference = null) {}
+    public function __construct(public Order $order, public ?string $paymentReference, public string $gateway) {}
 
     public function envelope(): Envelope
     {

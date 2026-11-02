@@ -29,10 +29,6 @@ class StripePaymentGateway implements PaymentGateway
             }
         }
 
-        $name = $order->quantity > 1
-            ? "{$order->product_name} × {$order->quantity}"
-            : $order->product_name;
-
         $session = $this->client->checkout->sessions->create([
             'mode' => 'payment',
             'client_reference_id' => $order->public_id,
@@ -43,7 +39,7 @@ class StripePaymentGateway implements PaymentGateway
                 'price_data' => [
                     'currency' => config('services.stripe.currency'),
                     'unit_amount' => $order->total,
-                    'product_data' => ['name' => $name, 'description' => $order->order_number],
+                    'product_data' => ['name' => $order->lineItemName(), 'description' => $order->order_number],
                 ],
             ]],
             'metadata' => ['order_number' => $order->order_number],
