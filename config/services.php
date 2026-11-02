@@ -28,12 +28,22 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // manual | stripe | chip
     'payment_gateway' => env('PAYMENT_GATEWAY', 'manual'),
 
     'stripe' => [
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
         'currency' => env('STRIPE_CURRENCY', 'myr'),
+    ],
+
+    'chip' => [
+        'url' => env('CHIP_URL', 'https://gate.chip-in.asia/api/v1'),
+        'brand_id' => env('CHIP_BRAND_ID'),
+        'secret' => env('CHIP_SECRET_KEY'),
+        // Company public key (GET /public_key/), used to verify the X-Signature on success callbacks.
+        'public_key' => env('CHIP_PUBLIC_KEY'),
+        'currency' => env('CHIP_CURRENCY', 'MYR'),
     ],
 
     'slack' => [

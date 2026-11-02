@@ -92,6 +92,14 @@ class Order extends Model
         return $this->belongsTo(Coupon::class);
     }
 
+    /**
+     * Single line item label sent to payment gateways.
+     */
+    public function lineItemName(): string
+    {
+        return $this->quantity > 1 ? "{$this->product_name} × {$this->quantity}" : $this->product_name;
+    }
+
     public function stateLabel(): ?string
     {
         return $this->state ? MalaysianState::tryFrom($this->state)?->label() : null;

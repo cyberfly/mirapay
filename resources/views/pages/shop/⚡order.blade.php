@@ -22,15 +22,29 @@ new #[Layout('layouts::shop', ['noindex' => true]), Title('Pesanan')] class exte
     {
         $this->order->refresh();
 
-        if ($this->order->status !== OrderStatus::Pending || $this->order->payment_gateway !== 'stripe') {
+        if (! $this->canPayOnline()) {
             return;
         }
 
         $this->redirect(app(PaymentGateway::class)->checkoutUrl($this->order));
     }
+
+    /**
+     * Only offer "pay" through the gateway the order was placed with, and only while that gateway is still active:
+     * paying through a different one would leave the first gateway's session open and payable.
+     */
+    public function canPayOnline(): bool
+    {
+        return $this->awaitsGateway() && $this->order->payment_gateway === config('services.payment_gateway');
+    }
+
+    public function awaitsGateway(): bool
+    {
+        return $this->order->status === OrderStatus::Pending && $this->order->payment_gateway !== 'manual';
+    }
 }; ?>
 
-<div class="mx-auto max-w-2xl space-y-6" @if ($order->status === OrderStatus::Pending && $order->payment_gateway === 'stripe') wire:poll.3s @endif>
+<div class="mx-auto max-w-2xl space-y-6" @if ($this->awaitsGateway()) wire:poll.3s @endif>
     <div class="flex flex-col gap-4 rounded-3xl bg-linear-to-br from-sky-50 via-white to-indigo-50 p-6 ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
             <p class="text-sm font-medium text-slate-500">Nombor pesanan</p>
@@ -39,11 +53,13 @@ new #[Layout('layouts::shop', ['noindex' => true]), Title('Pesanan')] class exte
         <flux:badge size="lg" :color="$order->status->color()">{{ $order->status->label() }}</flux:badge>
     </div>
 
-    @if ($order->status === OrderStatus::Pending && $order->payment_gateway === 'stripe')
+    @if ($this->awaitsGateway())
         <flux:callout variant="warning" icon="clock" heading="Menunggu pengesahan bayaran" text="Jika anda telah membayar, halaman ini akan dikemas kini secara automatik. Jika belum, sila teruskan pembayaran.">
-            <x-slot name="actions">
-                <flux:button wire:click="pay" variant="primary" size="sm">Bayar sekarang</flux:button>
-            </x-slot>
+            @if ($this->canPayOnline())
+                <x-slot name="actions">
+                    <flux:button wire:click="pay" variant="primary" size="sm">Bayar sekarang</flux:button>
+                </x-slot>
+            @endif
         </flux:callout>
     @elseif ($order->status === OrderStatus::Pending)
         <flux:callout variant="warning" icon="clock" heading="Pembayaran belum diterima" text="Pesanan anda telah direkodkan. Kami akan mengesahkan bayaran secara manual." />
